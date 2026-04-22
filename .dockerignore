@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Environment
+.env
+.env.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Node
+node_modules/
+
+# Documentation
+*.md
+!README.md
+
+# Deployment configs
+render.yaml
+railway.json
+Procfile
+runtime.txt
+
+# Tests
+test_*.py
+tests/
+
+# OS
+.DS_Store
+Thumbs.db
