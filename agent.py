@@ -49,20 +49,22 @@ class CountryInfoAgent:
     def _initialize_llm(self):
         """Initialize the language model based on environment variables"""
         model_name = os.getenv("MODEL_NAME", "gpt-4o-mini")
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+        openai_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-        if os.getenv("ANTHROPIC_API_KEY"):
+        if anthropic_key:
             logger.info(f"Using Anthropic Claude model: {model_name}")
             return ChatAnthropic(
                 model=model_name if "claude" in model_name else "claude-3-5-sonnet-20241022",
                 temperature=0,
-                api_key=os.getenv("ANTHROPIC_API_KEY")
+                api_key=anthropic_key
             )
-        elif os.getenv("OPENAI_API_KEY"):
+        elif openai_key:
             logger.info(f"Using OpenAI model: {model_name}")
             return ChatOpenAI(
                 model=model_name if "gpt" in model_name else "gpt-4o-mini",
                 temperature=0,
-                api_key=os.getenv("OPENAI_API_KEY")
+                api_key=openai_key
             )
         else:
             raise ValueError(
