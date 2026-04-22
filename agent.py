@@ -7,7 +7,7 @@ import operator
 import os
 import logging
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
@@ -51,8 +51,20 @@ class CountryInfoAgent:
         model_name = os.getenv("MODEL_NAME", "gpt-4o-mini")
         anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
         openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "").strip()
+        azure_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "").strip()
 
-        if anthropic_key:
+        # Priority: Azure OpenAI > Anthropic > OpenAI
+        if azure_endpoint and openai_key and azure_deployment:
+            logger.info(f"Using Azure OpenAI with deployment: {azure_deployment}")
+            return AzureChatOpenAI(
+                azure_endpoint=azure_endpoint,
+                azure_deployment=azure_deployment,
+                api_key=openai_key,
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview"),
+                temperature=0
+            )
+        elif anthropic_key:
             logger.info(f"Using Anthropic Claude model: {model_name}")
             return ChatAnthropic(
                 model=model_name if "claude" in model_name else "claude-3-5-sonnet-20241022",
@@ -68,7 +80,10 @@ class CountryInfoAgent:
             )
         else:
             raise ValueError(
-                "No API key found. Please set either OPENAI_API_KEY or ANTHROPIC_API_KEY in .env file"
+                "No API key found. Please set either:\n"
+                "- AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT_NAME, and OPENAI_API_KEY for Azure OpenAI\n"
+                "- OPENAI_API_KEY for standard OpenAI\n"
+                "- ANTHROPIC_API_KEY for Anthropic Claude"
             )
 
     def _build_graph(self):
